@@ -27,7 +27,7 @@ abstract class DbObject {
 	 * @return DbObject
 	 * @throws InvalidSqlQueryException
 	 */
-	abstract public static function get($id);
+        abstract public static function get($id);
 
 	/**
      * Renvoie un tableau correspondant à toutes les lignes de tables

@@ -1,38 +1,40 @@
 <?php
 
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
 namespace Classes\Webforce3\DB;
 
 use Classes\Webforce3\Config\Config;
 
-class City extends DbObject {
-
+/**
+ * Description of Country
+ *
+ * @author Tam
+ */
+class Country extends DbObject{
+  
     /** @var string */
-    protected $name;
-
-    /** @var Country */
-    protected $country;
-
+    protected $nameCountry;
+    
     /**
      * @param int $id
      * @return DbObject
      */
-    public function __construct($name = '', $country = NULL, $id = 0, $inserted = '') {
-        if (empty($country)) {
-            $this->country = new Country();
-        } else {
-            $this->country = $country;
-        }
-        
-        $this->name = $name;
+    public function __construct($nameCountry = '', $id = 0, $inserted = '') {
+        $this->nameCountry = $nameCountry;
 
         parent::__construct($id, $inserted);
     }
-
+   
     public static function get($id) {
         $sql = '
-		SELECT cit_name, country_cou_id, cit_id, cit_inserted
-		FROM city
-		WHERE cit_id = :id			
+		SELECT cou_name, cou_id, cou_inserted
+		FROM country
+		WHERE cou_id = :id			
 		';
         $stmt = Config::getInstance()->getPDO()->prepare($sql);
         $stmt->bindValue(':id', $id, \PDO::PARAM_INT);
@@ -42,8 +44,10 @@ class City extends DbObject {
         } else {
             $row = $stmt->fetch(\PDO::FETCH_ASSOC);
             if (!empty($row)) {
-                $currentObject = new City(
-                        $row['cit_name'], new Country($row['country_cou_id']), $row['cit_id'], $row['cit_inserted']
+                $currentObject = new Country(
+                        $row['cou_name'],
+                        new Country($row['cou_id']),                         
+                        $row['cou_inserted']
                 );
                 return $currentObject;
             }
@@ -51,7 +55,7 @@ class City extends DbObject {
 
         return false;
     }
-
+ 
     /**
      * @return DbObject[]
      */
@@ -59,9 +63,9 @@ class City extends DbObject {
         $returnList = array();
 
         $sql = '
-                SELECT cit_name, country_cou_id, cit_id, cit_inserted
-                FROM city
-                WHERE cit_id > 0			
+                SELECT cou_name, cou_id, cou_inserted
+		FROM country
+                WHERE cou_id > 0			
                 ';
 
         $stmt = Config::getInstance()->getPDO()->prepare($sql);
@@ -71,7 +75,9 @@ class City extends DbObject {
             $allDatas = $stmt->fetchAll(\PDO::FETCH_ASSOC);
             foreach ($allDatas as $row) {
                 $currentObject = new City(
-                        $row['cit_name'], new Country($row['country_cou_id']), $row['cit_id'], $row['cit_inserted']
+                        $row['cou_name'],
+                        new Country($row['cou_id']),                         
+                        $row['cou_inserted']
                 );
                 $returnList[] = $currentObject;
             }
@@ -79,7 +85,6 @@ class City extends DbObject {
 
         return $returnList;
     }
-
     /**
      * @return array
      */
@@ -87,9 +92,9 @@ class City extends DbObject {
         $returnList = array();
 
         $sql = '
-                SELECT cit_name, country_cou_id, cit_id, cit_inserted
-		FROM city
-		WHERE cit_id > 0
+                SELECT cou_name, cou_id, cou_inserted
+		FROM country
+                WHERE cou_id > 0
                ';
         $stmt = Config::getInstance()->getPDO()->prepare($sql);
         if ($stmt->execute() === false) {
@@ -97,29 +102,27 @@ class City extends DbObject {
         } else {
             $allDatas = $stmt->fetchAll(\PDO::FETCH_ASSOC);
             foreach ($allDatas as $row) {
-                $returnList[$row['cit_id']] = $row['cit_name'];
+                $returnList[$row['cou_id']] = $row['cou_name'];
             }
         }
 
         return $returnList;
     }
-
+    
     /**
      * @return bool
      */
     public function saveDB() {
         if ($this->id > 0) {
             $sql = '
-                    UPDATE city
-                    SET cit_name = :cityName,
-                    country_cou_id = :country,
-                    WHERE cit_id = :id
+                    UPDATE country
+                    SET cou_name = :couName,
+                    WHERE cou_id = :id
                     ';
             $stmt = Config::getInstance()->getPDO()->prepare($sql);
             $stmt->bindValue(':id', $this->id, \PDO::PARAM_INT);
-            $stmt->bindValue(':cityName', $this->cityName, \PDO::PARAM_STR);
-            $stmt->bindValue(':country', $this->country, \PDO::PARAM_STR);
-
+            $stmt->bindValue(':couName', $this->nameCountry, \PDO::PARAM_STR);
+            
             if ($stmt->execute() === false) {
                 throw new InvalidSqlQueryException($sql, $stmt);
             } else {
@@ -127,14 +130,13 @@ class City extends DbObject {
             }
         } else {
             $sql = '
-                    INSERT INTO city (cit_name, country_cou_id, cit_id)
-                    VALUES (:name, :country, :id)
+                    INSERT INTO country (cou_name, cou_id)
+                    VALUES (:couName, :id)
                    ';
             $stmt = Config::getInstance()->getPDO()->prepare($sql);
             $stmt->bindValue(':id', $this->id, \PDO::PARAM_INT);
-            $stmt->bindValue(':name', $this->name, \PDO::PARAM_STR);
-            $stmt->bindValue(':country', $this->country, \PDO::PARAM_STR);
-
+            $stmt->bindValue(':couName', $this->cityName, \PDO::PARAM_STR);
+          
             if ($stmt->execute() === false) {
                 throw new InvalidSqlQueryException($sql, $stmt);
             } else {
@@ -145,15 +147,15 @@ class City extends DbObject {
 
         return false;
     }
-
+    
     /**
      * @param int $id
      * @return bool
      */
     public static function deleteById($id) {
-      // TODO: Implement deleteById() method.
+      //  Implement deleteById() method.
        $sql = '
-               DELETE FROM city WHERE cit_id = :id
+               DELETE FROM country WHERE cou_id = :id
               ';
        
        $stmt = Config::getInstance()->getPDO()->prepare($sql);
@@ -168,11 +170,9 @@ class City extends DbObject {
         
     } 
     
-    function getName() {
-        return $this->name;
+    function getNameCountry() {
+        return $this->nameCountry;
     }
 
-    function getCountry() {
-        return $this->country;
-    }
+   
 }
